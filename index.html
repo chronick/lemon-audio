@@ -1,0 +1,308 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>LEMON AUDIO</title>
+<style>
+*, *::before, *::after { margin: 0; padding: 0; box-sizing: border-box; }
+
+:root {
+  --bg-deep: #0a0a0f;
+  --accent: #CCFF00;
+  --accent-glow: rgba(204, 255, 0, 0.4);
+  --neon-yellow: #FFFF00;
+  --neon-lime: #DFFF00;
+  --neon-pink: #FF10F0;
+  --neon-cyan: #00FFFF;
+  --neon-green: #39FF14;
+  --text-dim: #555568;
+  --font-mono: Menlo, Monaco, Consolas, 'Courier New', monospace;
+}
+
+@keyframes flicker {
+  0%, 100% { opacity: 1; }
+  92% { opacity: 1; }
+  93% { opacity: 0.8; }
+  94% { opacity: 1; }
+  96% { opacity: 0.9; }
+  97% { opacity: 1; }
+}
+
+@keyframes glow-pulse {
+  0%, 100% { filter: drop-shadow(0 0 8px var(--accent-glow)) drop-shadow(0 0 20px rgba(204, 255, 0, 0.15)); }
+  50% { filter: drop-shadow(0 0 14px var(--accent-glow)) drop-shadow(0 0 35px rgba(204, 255, 0, 0.25)); }
+}
+
+@keyframes float {
+  0%, 100% { transform: translateY(0px); }
+  50% { transform: translateY(-6px); }
+}
+
+@keyframes float-delayed {
+  0%, 100% { transform: translateY(0px) rotate(-5deg); }
+  50% { transform: translateY(-8px) rotate(5deg); }
+}
+
+@keyframes scan-move {
+  0% { top: -4px; }
+  100% { top: 100%; }
+}
+
+@keyframes fade-in-up {
+  from { opacity: 0; transform: translateY(20px); }
+  to { opacity: 1; transform: translateY(0); }
+}
+
+body {
+  font-family: var(--font-mono);
+  background: var(--bg-deep);
+  color: #e0e0e0;
+  overflow: hidden;
+  height: 100vh;
+  width: 100vw;
+  font-size: 13px;
+  line-height: 1.5;
+}
+
+/* Scan lines overlay */
+.scan-lines {
+  position: fixed;
+  inset: 0;
+  background: repeating-linear-gradient(
+    0deg,
+    transparent,
+    transparent 2px,
+    rgba(0, 0, 0, 0.06) 2px,
+    rgba(0, 0, 0, 0.06) 4px
+  );
+  pointer-events: none;
+  z-index: 9999;
+}
+
+/* Moving scan bar */
+.scan-bar {
+  position: fixed;
+  left: 0;
+  width: 100%;
+  height: 4px;
+  background: linear-gradient(180deg, transparent, rgba(204, 255, 0, 0.06), transparent);
+  pointer-events: none;
+  z-index: 9998;
+  animation: scan-move 8s linear infinite;
+}
+
+/* ===================== HERO ===================== */
+.hero {
+  height: 100vh;
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  justify-content: center;
+  position: relative;
+}
+
+/* Grid background */
+.hero::before {
+  content: '';
+  position: absolute;
+  inset: 0;
+  background-image:
+    linear-gradient(rgba(204, 255, 0, 0.03) 1px, transparent 1px),
+    linear-gradient(90deg, rgba(204, 255, 0, 0.03) 1px, transparent 1px);
+  background-size: 60px 60px;
+  mask-image: radial-gradient(ellipse 60% 50% at 50% 50%, black 20%, transparent 70%);
+  -webkit-mask-image: radial-gradient(ellipse 60% 50% at 50% 50%, black 20%, transparent 70%);
+}
+
+/* Radial accent glow behind character */
+.hero::after {
+  content: '';
+  position: absolute;
+  width: 500px;
+  height: 500px;
+  border-radius: 50%;
+  background: radial-gradient(circle, rgba(204, 255, 0, 0.06) 0%, transparent 70%);
+  top: 50%;
+  left: 50%;
+  transform: translate(-50%, -55%);
+  pointer-events: none;
+}
+
+/* ===================== LEMON-CHAN ===================== */
+.lemon-chan-wrap {
+  position: relative;
+  animation: float 4s ease-in-out infinite, fade-in-up 1s ease-out;
+  z-index: 2;
+  margin-bottom: 40px;
+}
+
+.lemon-chan {
+  font-size: 13px;
+  line-height: 1.15;
+  color: var(--neon-yellow);
+  text-shadow: 0 0 4px var(--neon-yellow), 0 0 12px rgba(255, 255, 0, 0.3);
+  white-space: pre;
+  animation: flicker 6s infinite;
+  user-select: none;
+}
+
+.lemon-chan .eye {
+  color: var(--neon-cyan);
+  text-shadow: 0 0 4px var(--neon-cyan), 0 0 10px rgba(0, 255, 255, 0.4);
+  transition: all 0.1s;
+}
+
+.lemon-chan .mouth {
+  color: #FF6B6B;
+  text-shadow: 0 0 4px #FF6B6B;
+}
+
+.lemon-chan .cheek {
+  color: var(--neon-pink);
+  text-shadow: 0 0 4px var(--neon-pink), 0 0 10px rgba(255, 16, 240, 0.3);
+}
+
+.lemon-chan .hp {
+  color: var(--neon-pink);
+  text-shadow: 0 0 3px var(--neon-pink), 0 0 8px rgba(255, 16, 240, 0.3);
+}
+
+/* Floating lemon */
+.lemon-fruit {
+  position: absolute;
+  top: -12px;
+  right: -52px;
+  font-size: 10px;
+  line-height: 1.0;
+  white-space: pre;
+  color: var(--neon-lime);
+  text-shadow: 0 0 6px var(--neon-lime);
+  animation: float-delayed 3s ease-in-out infinite;
+  user-select: none;
+}
+
+.lemon-fruit .sparkle {
+  color: #FFFF55;
+}
+
+/* ===================== TITLE ===================== */
+.title-block {
+  text-align: center;
+  z-index: 2;
+  animation: fade-in-up 1s ease-out 0.2s both;
+}
+
+.logo-ascii {
+  font-size: 8px;
+  line-height: 1.15;
+  color: var(--accent);
+  text-shadow: 0 0 6px var(--accent-glow), 0 0 20px rgba(204, 255, 0, 0.15);
+  white-space: pre;
+  animation: glow-pulse 4s ease-in-out infinite;
+  margin-bottom: 6px;
+  user-select: none;
+}
+
+.brand-sub {
+  font-size: 16px;
+  font-weight: 900;
+  letter-spacing: 12px;
+  color: var(--text-dim);
+  margin-bottom: 4px;
+  text-transform: uppercase;
+}
+
+.tagline-jp {
+  font-size: 13px;
+  color: var(--neon-pink);
+  text-shadow: 0 0 4px rgba(255, 16, 240, 0.4);
+  font-weight: bold;
+  letter-spacing: 3px;
+}
+
+.tagline-jp .sep {
+  color: var(--neon-cyan);
+}
+
+.tagline-jp .lemon-emoji {
+  color: var(--neon-green);
+}
+
+/* ===================== RESPONSIVE ===================== */
+@media (max-width: 600px) {
+  .logo-ascii { font-size: 5px; }
+  .brand-sub { font-size: 12px; letter-spacing: 6px; }
+  .lemon-chan { font-size: 10px; }
+  .lemon-fruit { font-size: 8px; right: -40px; }
+}
+</style>
+</head>
+<body>
+
+<div class="scan-lines"></div>
+<div class="scan-bar"></div>
+
+<section class="hero">
+
+  <!-- LEMON-CHAN -->
+  <div class="lemon-chan-wrap">
+    <!-- Floating lemon fruit -->
+    <div class="lemon-fruit">  <span style="color: #39FF14">&#x1F33F;</span>
+ &#x256D;&#x2500;&#x2500;&#x2500;&#x256E;
+&#x256D;&#x2524;<span class="sparkle">&#x25E0;&#x2726;&#x25E0;</span>&#x251C;&#x256E;
+&#x2570;&#x2524;<span class="sparkle">&#x25E0;&#x25E0;&#x25E0;</span>&#x251C;&#x256F;
+ &#x2570;&#x2500;&#x2500;&#x2500;&#x256F;</div>
+
+    <!-- Character -->
+    <pre class="lemon-chan">    &#x256D;&#x2500;&#x2500;&#x2500;&#x2500;&#x2500;&#x2500;&#x2500;&#x2500;&#x256E;
+   &#x2571; &#x256D;&#x2500;&#x256E;  &#x256D;&#x2500;&#x256E; &#x2572;
+  &#x2502;  &#x2502;<span class="hp">&#xB0;&#xB0;</span>&#x2502;  &#x2502;<span class="hp">&#xB0;&#xB0;</span>&#x2502;  &#x2502;
+  &#x2502;  &#x2570;&#x2500;&#x256F;  &#x2570;&#x2500;&#x256F;  &#x2502;
+  &#x2502; &#x256D;&#x2500;&#x2500;&#x2500;&#x2500;&#x2500;&#x2500;&#x2500;&#x2500;&#x256E; &#x2502;
+  &#x2502; &#x2502; <span class="eye" id="eyeL">&#x25CF;</span>    <span class="eye" id="eyeR">&#x25CF;</span> &#x2502; &#x2502;
+  &#x2502; &#x2502;<span class="cheek">&#x2591;</span>  <span class="mouth" id="mouth">&#x03C9;</span>  <span class="cheek">&#x2591;</span>&#x2502; &#x2502;
+  &#x2502; &#x2570;&#x2500;&#x2500;&#x2500;&#x2500;&#x2500;&#x2500;&#x2500;&#x2500;&#x256F; &#x2502;
+  &#x2570;&#x2500;&#x256E;  &#x2502;&#x2502;  &#x256D;&#x2500;&#x256F;
+    &#x2570;&#x2500;&#x2500;&#x256F;&#x2570;&#x2500;&#x2500;&#x256F;</pre>
+  </div>
+
+  <!-- TITLE -->
+  <div class="title-block">
+    <pre class="logo-ascii">&#x2588;&#x2588;&#x2557;     &#x2588;&#x2588;&#x2588;&#x2588;&#x2588;&#x2588;&#x2588;&#x2557;&#x2588;&#x2588;&#x2588;&#x2557;   &#x2588;&#x2588;&#x2588;&#x2557; &#x2588;&#x2588;&#x2588;&#x2588;&#x2588;&#x2588;&#x2557; &#x2588;&#x2588;&#x2588;&#x2557;   &#x2588;&#x2588;&#x2557;
+&#x2588;&#x2588;&#x2551;     &#x2588;&#x2588;&#x2554;&#x2550;&#x2550;&#x2550;&#x2550;&#x255D;&#x2588;&#x2588;&#x2588;&#x2588;&#x2557; &#x2588;&#x2588;&#x2588;&#x2588;&#x2551;&#x2588;&#x2588;&#x2554;&#x2550;&#x2550;&#x2550;&#x2588;&#x2588;&#x2557;&#x2588;&#x2588;&#x2588;&#x2588;&#x2557;  &#x2588;&#x2588;&#x2551;
+&#x2588;&#x2588;&#x2551;     &#x2588;&#x2588;&#x2588;&#x2588;&#x2588;&#x2557;  &#x2588;&#x2588;&#x2554;&#x2588;&#x2588;&#x2588;&#x2588;&#x2554;&#x2588;&#x2588;&#x2551;&#x2588;&#x2588;&#x2551;   &#x2588;&#x2588;&#x2551;&#x2588;&#x2588;&#x2554;&#x2588;&#x2588;&#x2557; &#x2588;&#x2588;&#x2551;
+&#x2588;&#x2588;&#x2551;     &#x2588;&#x2588;&#x2554;&#x2550;&#x2550;&#x255D;  &#x2588;&#x2588;&#x2551;&#x255A;&#x2588;&#x2588;&#x2554;&#x255D;&#x2588;&#x2588;&#x2551;&#x2588;&#x2588;&#x2551;   &#x2588;&#x2588;&#x2551;&#x2588;&#x2588;&#x2551;&#x255A;&#x2588;&#x2588;&#x2557;&#x2588;&#x2588;&#x2551;
+&#x2588;&#x2588;&#x2588;&#x2588;&#x2588;&#x2588;&#x2588;&#x2557;&#x2588;&#x2588;&#x2588;&#x2588;&#x2588;&#x2588;&#x2588;&#x2557;&#x2588;&#x2588;&#x2551; &#x255A;&#x2550;&#x255D; &#x2588;&#x2588;&#x2551;&#x255A;&#x2588;&#x2588;&#x2588;&#x2588;&#x2588;&#x2588;&#x2554;&#x255D;&#x2588;&#x2588;&#x2551; &#x255A;&#x2588;&#x2588;&#x2588;&#x2588;&#x2551;
+&#x255A;&#x2550;&#x2550;&#x2550;&#x2550;&#x2550;&#x2550;&#x255D;&#x255A;&#x2550;&#x2550;&#x2550;&#x2550;&#x2550;&#x2550;&#x255D;&#x255A;&#x2550;&#x255D;     &#x255A;&#x2550;&#x255D; &#x255A;&#x2550;&#x2550;&#x2550;&#x2550;&#x2550;&#x255D; &#x255A;&#x2550;&#x255D;  &#x255A;&#x2550;&#x2550;&#x2550;&#x255D;</pre>
+    <div class="brand-sub">audio</div>
+    <div class="tagline-jp">&#x30EC;&#x30E2;&#x30F3; <span class="sep">///</span> <span class="lemon-emoji">&#x1F34B;</span></div>
+  </div>
+
+</section>
+
+<script>
+// Blinking eyes
+const eyeL = document.getElementById('eyeL');
+const eyeR = document.getElementById('eyeR');
+const mouth = document.getElementById('mouth');
+const mouths = ['\u03C9', '\u25BD', '\u03C9', '\u25CB'];
+let mouthFrame = 0;
+
+setInterval(() => {
+  eyeL.textContent = '\u2500';
+  eyeR.textContent = '\u2500';
+  setTimeout(() => {
+    eyeL.textContent = '\u25CF';
+    eyeR.textContent = '\u25CF';
+  }, 150);
+}, 2800);
+
+setInterval(() => {
+  mouthFrame = (mouthFrame + 1) % mouths.length;
+  mouth.textContent = mouths[mouthFrame];
+}, 2400);
+</script>
+
+</body>
+</html>
