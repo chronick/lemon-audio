@@ -1,0 +1,70 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>LEMON AUDIO // FLASHER</title>
+  <link rel="icon" href="/favicon.ico" sizes="48x48">
+  <link rel="icon" href="/favicon-32x32.png" sizes="32x32" type="image/png">
+  <link rel="icon" href="/favicon-192x192.png" sizes="192x192" type="image/png">
+  <link rel="apple-touch-icon" href="/apple-touch-icon.png">
+</head>
+<body>
+  <div class="scan-lines"></div>
+  <div class="scan-bar"></div>
+
+  <div class="container">
+    <header>
+      <a href="/">&larr; LEMON AUDIO</a>
+      <h1>Firmware Flasher</h1>
+      <p>Flash Eurorack firmware via WebUSB</p>
+    </header>
+
+    <div id="browser-warning" class="browser-warning" style="display: none;">
+      WebUSB is not available in this browser. Use <a href="https://www.google.com/chrome/">Chrome</a> or Edge.
+    </div>
+
+    <!-- Firmware catalog -->
+    <div id="firmware-list" class="firmware-list"></div>
+
+    <!-- Flash panel -->
+    <div class="flash-panel">
+      <h2>Flash</h2>
+
+      <div id="device-info" class="device-info" style="display: none;"></div>
+
+      <div class="btn-row">
+        <button id="connect-btn">Connect</button>
+        <button id="flash-btn" class="primary" disabled>Flash</button>
+      </div>
+
+      <div class="progress-wrap">
+        <div class="progress-bar">
+          <div id="progress-fill" class="progress-bar-fill"></div>
+        </div>
+        <div id="progress-text" class="progress-text"></div>
+      </div>
+
+      <div id="status-log" class="status-log"></div>
+    </div>
+
+    <!-- Instructions -->
+    <div class="instructions">
+      <h3>How to flash</h3>
+      <ol>
+        <li>Select a firmware above</li>
+        <li>Put your <em>patch.init()</em> in DFU mode: hold <code>BOOT</code> + press <code>RESET</code></li>
+        <li>Click <strong>Connect</strong> and select the STM32 device</li>
+        <li>Click <strong>Flash</strong> and wait for completion</li>
+        <li>Press <code>RESET</code> to start your new firmware</li>
+      </ol>
+    </div>
+
+    <footer>
+      <a href="/">LEMON AUDIO</a> // flasher v0.1.0
+    </footer>
+  </div>
+
+  <script type="module" src="/src/main.ts"></script>
+</body>
+</html>

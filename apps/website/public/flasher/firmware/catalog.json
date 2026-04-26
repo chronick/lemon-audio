@@ -1,0 +1,28 @@
+[
+  {
+    "id": "duopulse",
+    "name": "DuoPulse",
+    "description": "2-voice algorithmic percussion sequencer. Euclidean rhythms, probability, accent patterns.",
+    "platform": "patch-init",
+    "repo": "chronick/duopulse",
+    "asset": "duopulse.bin",
+    "controls": {
+      "knobs": ["tempo", "density", "probability", "accent"],
+      "cv": ["clock-in", "reset", "pattern-cv"],
+      "gate": ["trig-1", "trig-2"]
+    }
+  },
+  {
+    "id": "qpas-ish",
+    "name": "QPAS-ish",
+    "description": "Quad-peak animated filter inspired by Make Noise QPAS. Four resonant bandpass peaks with animated spacing.",
+    "platform": "patch-init",
+    "repo": "chronick/qpas-ish",
+    "asset": "qpas-ish.bin",
+    "controls": {
+      "knobs": ["freq", "resonance", "spread", "radiate"],
+      "cv": ["freq-cv", "spread-cv"],
+      "audio": ["in-L", "in-R", "out-L", "out-R"]
+    }
+  }
+]

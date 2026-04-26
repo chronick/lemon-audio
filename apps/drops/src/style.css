@@ -1,0 +1,94 @@
+*, *::before, *::after {
+  margin: 0;
+  padding: 0;
+  box-sizing: border-box;
+}
+
+:root {
+  --bg-deep: #0a0a0f;
+  --accent: #CCFF00;
+  --accent-glow: rgba(204, 255, 0, 0.4);
+  --neon-pink: #FF10F0;
+  --neon-cyan: #00FFFF;
+  --neon-green: #39FF14;
+  --text-dim: #555568;
+  --text-light: #e0e0e0;
+  --font-mono: Menlo, Monaco, Consolas, 'Courier New', monospace;
+}
+
+body {
+  font-family: var(--font-mono);
+  background: var(--bg-deep);
+  color: var(--text-light);
+  min-height: 100vh;
+}
+
+/* Index page */
+.drops-index {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  justify-content: center;
+  min-height: 100vh;
+  padding: 2rem;
+}
+
+.drops-logo {
+  font-size: 2.5rem;
+  color: var(--accent);
+  text-shadow: 0 0 10px var(--accent-glow), 0 0 30px rgba(204, 255, 0, 0.15);
+  margin-bottom: 0.5rem;
+}
+
+.drops-tagline {
+  color: var(--text-dim);
+  font-size: 0.85rem;
+  margin-bottom: 3rem;
+}
+
+.drops-tagline a {
+  color: var(--neon-cyan);
+  text-decoration: none;
+}
+
+.drops-tagline a:hover {
+  text-shadow: 0 0 8px var(--neon-cyan);
+}
+
+.drops-grid {
+  display: grid;
+  grid-template-columns: repeat(auto-fill, minmax(240px, 1fr));
+  gap: 1rem;
+  width: 100%;
+  max-width: 800px;
+}
+
+.drop-card {
+  display: flex;
+  flex-direction: column;
+  gap: 0.25rem;
+  padding: 1.5rem;
+  border: 1px solid rgba(204, 255, 0, 0.15);
+  background: rgba(204, 255, 0, 0.02);
+  text-decoration: none;
+  color: var(--text-light);
+  transition: all 0.2s;
+}
+
+.drop-card:hover {
+  border-color: var(--accent);
+  background: rgba(204, 255, 0, 0.06);
+  box-shadow: 0 0 20px rgba(204, 255, 0, 0.1);
+}
+
+.drop-number {
+  font-size: 0.75rem;
+  color: var(--text-dim);
+}
+
+.drop-title {
+  font-size: 1.1rem;
+  font-weight: bold;
+  color: var(--accent);
+  text-shadow: 0 0 4px var(--accent-glow);
+}
