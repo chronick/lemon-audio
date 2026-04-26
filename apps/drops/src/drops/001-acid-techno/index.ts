@@ -6,7 +6,8 @@
  */
 
 import type { Drop } from "../../shared/types.ts";
-import { AcidEngine } from "./audio.ts";
+import { readPresetFromHash } from "../../shared/preset.ts";
+import { AcidEngine, type EngineState } from "./audio.ts";
 import { KICK_PATTERNS, ACID_PATTERNS, SYNTH_PATTERNS, ATMO_PRESETS } from "./patterns.ts";
 import { renderUI, type UIHandle } from "./ui.ts";
 
@@ -26,7 +27,17 @@ let uiHandle: UIHandle | null = null;
 function mount(container: HTMLElement): void {
   engine = new AcidEngine();
   engine.init(KICK_PATTERNS, ACID_PATTERNS, SYNTH_PATTERNS, ATMO_PRESETS);
+
+  // Apply shared preset, if the URL carries one. Audio stays stopped
+  // until the user clicks PLAY (browsers require a gesture anyway).
+  const preset = readPresetFromHash<Partial<EngineState>>();
+  if (preset) {
+    const safe = { ...engine.state, ...preset, playing: false, currentStep: 0 } as EngineState;
+    engine.applySnapshot(safe);
+  }
+
   uiHandle = renderUI(container, engine);
+  if (preset) uiHandle.syncFromEngine();
 }
 
 function destroy(): void {

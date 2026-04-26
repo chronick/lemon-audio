@@ -5,6 +5,7 @@
  */
 
 import { LEMON_THEME as T } from "../../shared/theme.ts";
+import { buildShareUrl, stripPresetQuery } from "../../shared/preset.ts";
 import type { AcidEngine } from "./audio.ts";
 import {
   KICK_PATTERNS,
@@ -220,6 +221,27 @@ const CSS = `
     font-size: 0.9rem;
     text-align: center;
     padding: 0.2rem;
+  }
+
+  .share-btn {
+    background: none;
+    border: 1px solid ${T.neonCyan};
+    color: ${T.neonCyan};
+    font-family: ${T.fontMono};
+    font-size: 0.7rem;
+    padding: 0.35rem 0.75rem;
+    cursor: pointer;
+    letter-spacing: 1px;
+    transition: all 0.15s;
+  }
+  .share-btn:hover {
+    background: rgba(0, 255, 255, 0.08);
+    box-shadow: 0 0 10px rgba(0, 255, 255, 0.25);
+  }
+  .share-btn.copied {
+    border-color: ${T.neonGreen};
+    color: ${T.neonGreen};
+    text-shadow: 0 0 6px ${T.neonGreen};
   }
 
   .step-dots {
@@ -487,6 +509,7 @@ export function renderUI(container: HTMLElement, engine: AcidEngine): UIHandle {
             `<div class="step-dot${i % 4 === 0 ? " beat" : ""}" data-step="${i}"></div>`
           ).join("")}
         </div>
+        <button type="button" class="share-btn" id="share-btn" title="Copy a URL that replays this preset">SHARE</button>
       </div>
 
       <div class="channels-area">
@@ -636,6 +659,37 @@ export function renderUI(container: HTMLElement, engine: AcidEngine): UIHandle {
 
   bpmInput.addEventListener("change", () => {
     engine.setBpm(parseInt(bpmInput.value));
+  });
+
+  const shareBtn = document.getElementById("share-btn") as HTMLButtonElement;
+  let shareTimer: number | null = null;
+  shareBtn.addEventListener("click", async () => {
+    const snapshot = engine.getSnapshot();
+    // Strip transient runtime fields — recipient should land stopped at step 0.
+    const { playing: _p, currentStep: _s, ...preset } = snapshot;
+    void _p; void _s;
+    const dropId = stripPresetQuery(window.location.hash) || "001-acid-techno";
+    const url = buildShareUrl(dropId, preset);
+
+    let copied = false;
+    try {
+      await navigator.clipboard.writeText(url);
+      copied = true;
+    } catch {
+      // Fallback for browsers without clipboard API or in non-secure contexts.
+      window.prompt("Copy this URL:", url);
+    }
+
+    if (copied) {
+      if (shareTimer !== null) clearTimeout(shareTimer);
+      shareBtn.classList.add("copied");
+      shareBtn.textContent = "COPIED";
+      shareTimer = window.setTimeout(() => {
+        shareBtn.classList.remove("copied");
+        shareBtn.textContent = "SHARE";
+        shareTimer = null;
+      }, 1500);
+    }
   });
 
   // Mute buttons + pattern select

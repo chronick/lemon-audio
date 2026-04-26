@@ -1,11 +1,19 @@
 import { getDropIds, loadDrop } from "./drops/registry.ts";
+import { stripPresetQuery } from "./shared/preset.ts";
 import "./style.css";
 
 const app = document.getElementById("app")!;
 
-/** Simple hash router: #001-acid-techno loads that drop, empty hash shows index */
+let lastRoutedId = "";
+
+/** Hash router: `#<dropId>` loads that drop. Trailing `?p=<...>` carries
+ *  a shareable preset payload that the drop reads itself. We swallow
+ *  preset-only changes here so the drop isn't remounted on every share. */
 async function route() {
-  const dropId = window.location.hash.slice(1);
+  const dropId = stripPresetQuery(window.location.hash);
+
+  if (dropId === lastRoutedId) return;
+  lastRoutedId = dropId;
 
   if (dropId && getDropIds().includes(dropId)) {
     const drop = await loadDrop(dropId);
