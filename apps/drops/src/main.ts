@@ -4,7 +4,7 @@ import "./style.css";
 
 const app = document.getElementById("app")!;
 
-let lastRoutedId = "";
+let lastRoutedId: string | null = null;
 
 /** Hash router: `#<dropId>` loads that drop. Trailing `?p=<...>` carries
  *  a shareable preset payload that the drop reads itself. We swallow
