@@ -213,6 +213,107 @@ export class DfuDevice {
     ) {
       await this.device.selectAlternateInterface(intfNumber, altSetting);
     }
+
+    // Robustness: if the DfuSe memory map wasn't available from the interface
+    // name at construction (some browsers/devices don't surface
+    // `alt.interfaceName`), recover it now. Without it `isDfuSe` is false and we
+    // fall back to PLAIN DFU, which an STM32 DfuSe bootloader misreads (block 0/1
+    // are interpreted as commands) → a GETSTATUS stall mid-download.
+    if (this.memoryInfo === null) {
+      await this.recoverMemoryInfo();
+    }
+  }
+
+  private async recoverMemoryInfo(): Promise<void> {
+    // 1) The selected alternate's interfaceName may be populated after open.
+    try {
+      const intf = this.device.configuration?.interfaces[this.intfNumber];
+      const nm = intf?.alternate?.interfaceName;
+      if (nm && nm.startsWith("@")) {
+        this.memoryInfo = parseMemoryDescriptor(nm);
+        this.logInfo("Recovered DfuSe memory map from interface name");
+        return;
+      }
+    } catch {
+      // fall through
+    }
+    // 2) Fetch the interface (iInterface) string descriptor directly.
+    try {
+      const idx = await this.readInterfaceStringIndex();
+      if (idx) {
+        const nm = await this.readStringDescriptor(idx);
+        if (nm && nm.startsWith("@")) {
+          this.memoryInfo = parseMemoryDescriptor(nm);
+          this.logInfo(`Recovered DfuSe memory map: ${nm}`);
+          return;
+        }
+      }
+    } catch (e) {
+      this.logWarning(`String-descriptor recovery failed: ${e}`);
+    }
+    // 3) ST system-bootloader fallback: assume the internal-flash DfuSe layout
+    //    (matches `@Internal Flash /0x08000000/16*128Kg`). Plain DFU never works
+    //    on this bootloader, so DfuSe-with-assumed-layout is the correct repair.
+    if (this.device.vendorId === 0x0483) {
+      this.memoryInfo = {
+        name: "Internal Flash (assumed)",
+        segments: [
+          {
+            start: 0x08000000,
+            sectorSize: 0x20000,
+            end: 0x08000000 + 0x20000 * 16,
+            readable: true,
+            erasable: true,
+            writable: true,
+          },
+        ],
+      };
+      this.logWarning(
+        "No DfuSe descriptor surfaced — assuming STM32 internal flash (16*128K @ 0x08000000)"
+      );
+    }
+  }
+
+  /** Read the iInterface string index for the active (interface, alt) pair. */
+  private async readInterfaceStringIndex(): Promise<number> {
+    const data = await this.readConfigurationDescriptor(0);
+    const want = this.settings.alternate.alternateSetting;
+    let off = 0;
+    while (off + 9 <= data.byteLength) {
+      const bLength = data.getUint8(off);
+      const bType = data.getUint8(off + 1);
+      if (bLength === 0) break;
+      if (bType === 0x04) {
+        // INTERFACE descriptor
+        const ifNum = data.getUint8(off + 2);
+        const altSet = data.getUint8(off + 3);
+        const iInterface = data.getUint8(off + 8);
+        if (ifNum === this.intfNumber && altSet === want) return iInterface;
+      }
+      off += bLength;
+    }
+    return 0;
+  }
+
+  /** GET_DESCRIPTOR(STRING) for a string-descriptor index → its UTF-16LE text. */
+  private async readStringDescriptor(index: number): Promise<string | null> {
+    const r = await this.device.controlTransferIn(
+      {
+        requestType: "standard",
+        recipient: "device",
+        request: 0x06, // GET_DESCRIPTOR
+        value: (0x03 << 8) | index, // STRING descriptor
+        index: 0x0409, // langid en-US
+      },
+      255
+    );
+    if (r.status !== "ok" || !r.data) return null;
+    const len = r.data.getUint8(0);
+    let s = "";
+    for (let i = 2; i + 1 < len; i += 2) {
+      s += String.fromCharCode(r.data.getUint16(i, true));
+    }
+    return s;
   }
 
   async close(): Promise<void> {
