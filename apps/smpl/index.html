@@ -1,0 +1,145 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>smpl analyze — LEMON AUDIO</title>
+<style>
+*, *::before, *::after { margin: 0; padding: 0; box-sizing: border-box; }
+:root {
+  --bg-deep: #0a0a0f;
+  --panel: #0f0f16;
+  --accent: #CCFF00;
+  --accent-glow: rgba(204, 255, 0, 0.4);
+  --neon-pink: #FF10F0;
+  --neon-cyan: #00FFFF;
+  --text: #e0e0e0;
+  --text-dim: #555568;
+  --rule: #222233;
+  --font-mono: Menlo, Monaco, Consolas, 'Courier New', monospace;
+}
+body { font-family: var(--font-mono); background: var(--bg-deep); color: var(--text);
+  font-size: 13px; line-height: 1.6; padding: 48px 20px 80px; }
+.scan-lines { position: fixed; inset: 0; pointer-events: none; z-index: 9999;
+  background: repeating-linear-gradient(0deg, transparent, transparent 2px,
+    rgba(0,0,0,0.06) 2px, rgba(0,0,0,0.06) 4px); }
+main { max-width: 760px; margin: 0 auto; }
+h1 { font-size: 22px; letter-spacing: 6px; text-transform: uppercase; font-weight: 900;
+  color: var(--accent); text-shadow: 0 0 8px var(--accent-glow); }
+h2 { font-size: 11px; letter-spacing: 3px; text-transform: uppercase; font-weight: bold;
+  color: var(--neon-pink); margin: 34px 0 10px; }
+.eyebrow { font-size: 10px; letter-spacing: 4px; text-transform: uppercase;
+  color: var(--text-dim); margin-bottom: 8px; }
+.lede { color: var(--text); margin: 18px 0 6px; }
+.lede b { color: var(--neon-cyan); font-weight: normal; }
+p { color: #b8b8c4; margin-bottom: 10px; }
+pre { background: var(--panel); border: 1px solid var(--rule); font-size: 12px;
+  border-left: 2px solid var(--accent); padding: 12px 14px; overflow-x: auto;
+  color: #cfcfda; white-space: pre; margin: 10px 0; }
+pre .c { color: var(--text-dim); }
+pre .k { color: var(--accent); }
+ul { list-style: none; margin: 8px 0 8px 2px; }
+li { color: #b8b8c4; margin-bottom: 5px; }
+li::before { content: '\203A'; color: var(--accent); margin-right: 8px; }
+table { border-collapse: collapse; width: 100%; font-size: 12px; margin: 10px 0; }
+th, td { text-align: left; padding: 5px 10px 5px 0; border-bottom: 1px solid var(--rule); }
+th { color: var(--text-dim); font-weight: normal; text-transform: uppercase;
+  font-size: 10px; letter-spacing: 2px; }
+td.n { color: var(--accent); }
+.status { border: 1px solid var(--rule); background: var(--panel); font-size: 12px;
+  padding: 10px 14px; margin: 26px 0; color: #b8b8c4; }
+.status b { color: var(--accent); font-weight: normal; }
+a { color: var(--neon-cyan); text-decoration: none; border-bottom: 1px dotted currentColor; }
+a:hover { color: var(--accent); }
+footer { margin-top: 44px; padding-top: 14px; border-top: 1px solid var(--rule);
+  font-size: 10px; letter-spacing: 1px; color: var(--text-dim); }
+</style>
+</head>
+<body>
+
+<div class="scan-lines"></div>
+
+<main>
+  <div class="eyebrow">lemon audio // incubating</div>
+  <h1>smpl analyze</h1>
+
+  <p class="lede">One endpoint. Audio bytes in, a <b>structured descriptor report</b> out —
+  loudness, spectral shape, and quality-control flags an LLM can actually read.
+  Waveforms are opaque to a language model; measurements are not.</p>
+
+  <h2>POST /analyze</h2>
+  <p>Raw bytes in the request body, <code>Content-Type: audio/*</code>. No multipart, no
+  upload form, no account. The server writes the bytes to a temp file, runs the smpl pipe
+  <code>read | loudness | spectral | qc | view</code>, and deletes the file before it replies.</p>
+
+<pre><span class="c"># the four-second demo loop shipped with smpl</span>
+curl -LO https://chronick.github.io/smpl/assets/loop.wav
+
+curl --data-binary @loop.wav \
+     -H <span class="k">'Content-Type: audio/wav'</span> \
+     <span class="k">'http://localhost:8791/analyze?name=loop.wav'</span></pre>
+
+  <p>The response is JSON with three keys — <code>report</code> (the Markdown table smpl's
+  <code>view</code> renders), <code>features</code> (grouped by role), and <code>frames</code>
+  (every raw NDJSON frame, if you want the lineage and content hashes):</p>
+
+<pre>{
+  "report": "# smpl analysis report\n\n**5 frame(s):** …",
+  "features": {
+    "loudness": {
+      "loudness.integrated_lufs": <span class="k">-20.79</span>,
+      "loudness.true_peak_dbtp": <span class="k">-6.71</span>,
+      "loudness.max_short_term_lufs": -20.71
+    },
+    "spectral": { "lowlevel.spectral_rolloff": {"mean": 5228.39, …}, … },
+    "qc": {
+      "qc.clipping.detected": <span class="k">false</span>,
+      "qc.snr_db": 13.91,
+      "qc.lossy.spectral_cutoff_hz": 19993.6,
+      "qc.lossy.confidence": 0.001
+    }
+  },
+  "frames": [ … ]
+}</pre>
+
+  <p>That is the same loop, and those are the same numbers, the smpl README quotes for a
+  local install — the endpoint adds no analysis of its own.</p>
+
+  <h2>Routes</h2>
+  <table>
+    <tr><th>method</th><th>route</th><th>what it does</th></tr>
+    <tr><td class="n">POST</td><td class="n">/analyze</td><td>audio bytes → descriptor JSON</td></tr>
+    <tr><td class="n">GET</td><td class="n">/healthz</td><td>liveness + the smpl version behind it</td></tr>
+    <tr><td class="n">GET</td><td class="n">/</td><td>this page</td></tr>
+  </table>
+
+  <h2>Limits</h2>
+  <ul>
+    <li>25 MB request cap — a loop or a stem, not an album.</li>
+    <li>120 s analysis budget per request.</li>
+    <li><code>audio/*</code> content types only; anything else is a 415.</li>
+    <li>Stateless. Nothing is stored, nothing is queued, no bytes survive the response.</li>
+  </ul>
+
+  <div class="status">
+    <b>Status.</b> Analysis is done by the open-source <a href="https://github.com/chronick/smpl">smpl</a>
+    engine, shelled as a subprocess — this service is a thin stdlib HTTP wrapper around
+    <code>read | loudness | spectral | qc | view</code> and adds no DSP.
+    The endpoint is <b>incubating under lemon.audio</b> and self-hosted; expect it to move to
+    its own subdomain. There is no uptime promise and no API key.
+  </div>
+
+  <h2>The engine</h2>
+  <p>smpl is a composable, content-addressed audio-analysis toolchain you pipe like
+  <code>jq</code>: one self-describing NDJSON frame per line, heavy bytes referenced by hash
+  rather than carried. Everything this endpoint returns, you can produce locally.</p>
+  <ul>
+    <li><a href="https://github.com/chronick/smpl">github.com/chronick/smpl</a> — source, spec, install</li>
+    <li><a href="https://chronick.github.io/smpl/">chronick.github.io/smpl</a> — docs and the demo assets</li>
+  </ul>
+
+  <footer>LEMON AUDIO // smpl analyze — <a href="/healthz">healthz</a></footer>
+</main>
+
+</body>
+</html>
