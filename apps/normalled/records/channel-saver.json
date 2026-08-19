@@ -1,0 +1,123 @@
+{
+  "schema_version": "1.0.0",
+  "module": {
+    "slug": "channel-saver",
+    "name": "Channel Saver (Ch.Svr)",
+    "manufacturer": "Make Noise",
+    "format": "3U",
+    "hp": 6,
+    "firmware_version": null,
+    "power": { "plus_12v_ma": 20, "minus_12v_ma": 10 },
+    "manual": { "path": "modules/channel-saver/manual.pdf", "pages": 9 },
+    "jacks": [
+      { "id": "ch1-in", "name": "Channel 1 Input", "direction": "in", "kind": "cv" },
+      { "id": "ch1-out", "name": "Channel 1 Output", "direction": "out", "kind": "cv" },
+      { "id": "ch2-in", "name": "Channel 2 Input", "direction": "in", "kind": "cv" },
+      { "id": "ch2-out", "name": "Channel 2 Output", "direction": "out", "kind": "cv" },
+      { "id": "ch3-a-in", "name": "Channel 3 A Input", "direction": "in", "kind": "cv" },
+      { "id": "ch3-b-in", "name": "Channel 3 B Input", "direction": "in", "kind": "cv" },
+      { "id": "sum-out", "name": "SUM Output", "direction": "out", "kind": "cv" },
+      { "id": "inv-sum-out", "name": "Inverted SUM Output", "direction": "out", "kind": "cv" }
+    ],
+    "controls": [
+      { "id": "ch1-atten", "name": "Channel 1 Attenuverter", "type": "knob" },
+      { "id": "ch2-atten", "name": "Channel 2 Attenuverter", "type": "knob" },
+      { "id": "ch3-xfade", "name": "Channel 3 Crossfader", "type": "knob" }
+    ]
+  },
+  "facts": [
+    {
+      "id": "channel-saver:normalled-to:1",
+      "subject": "channel-saver/ch1-in",
+      "predicate": "normalled_to",
+      "value": "+5V DC",
+      "description": "Channel 1's input is normalled to a +5V DC source, so the channel is an offset generator when unpatched.",
+      "source": { "type": "pdf_page", "ref": "modules/channel-saver/manual.pdf#page=6", "page": 6 },
+      "confidence": "high"
+    },
+    {
+      "id": "channel-saver:normalled-to:2",
+      "subject": "channel-saver/ch2-in",
+      "predicate": "normalled_to",
+      "value": "+8V DC",
+      "description": "Channel 2's input is normalled to +8V DC — a different normal from Channel 1, which is the module's main trap.",
+      "source": { "type": "pdf_page", "ref": "modules/channel-saver/manual.pdf#page=6", "page": 6 },
+      "confidence": "high"
+    },
+    {
+      "id": "channel-saver:normalled-to:3",
+      "subject": "channel-saver/ch3-a-in",
+      "predicate": "normalled_to",
+      "value": "ground (0V DC)",
+      "description": "Channel 3's A input is normalled to ground rather than to a voltage, unlike Channels 1 and 2.",
+      "source": { "type": "pdf_page", "ref": "modules/channel-saver/manual.pdf#page=6", "page": 6 },
+      "confidence": "high"
+    },
+    {
+      "id": "channel-saver:summed-into:1",
+      "subject": "channel-saver",
+      "predicate": "summed_into",
+      "value": {
+        "sum": "channel-saver/sum-out",
+        "inverted_sum": "channel-saver/inv-sum-out"
+      },
+      "description": "All three channels are normalled to a SUM and an Inverted SUM bus through their own output jacks.",
+      "source": { "type": "pdf_page", "ref": "modules/channel-saver/manual.pdf#page=7", "page": 7 },
+      "confidence": "high"
+    },
+    {
+      "id": "channel-saver:normalization-breaks-at:1",
+      "subject": "channel-saver/ch1-out",
+      "predicate": "normalization_breaks_at",
+      "value": "cable inserted in Channel 1 Output",
+      "description": "Patching Channel 1's output takes that channel out of both the SUM and Inverted SUM buses.",
+      "source": { "type": "pdf_page", "ref": "modules/channel-saver/manual.pdf#page=6", "page": 6 },
+      "confidence": "high"
+    },
+    {
+      "id": "channel-saver:normalization-breaks-at:2",
+      "subject": "channel-saver/ch2-out",
+      "predicate": "normalization_breaks_at",
+      "value": "cable inserted in Channel 2 Output",
+      "description": "Patching Channel 2's output takes that channel out of both the SUM and Inverted SUM buses.",
+      "source": { "type": "pdf_page", "ref": "modules/channel-saver/manual.pdf#page=6", "page": 6 },
+      "confidence": "high"
+    },
+    {
+      "id": "channel-saver:control-range:1",
+      "subject": "channel-saver/ch1-atten",
+      "predicate": "control_range",
+      "value": "-5V to +5V DC offset with Channel 1 Input unpatched",
+      "description": "With no external signal the attenuverter scales and inverts the +5V normal into a bipolar offset.",
+      "source": { "type": "pdf_page", "ref": "modules/channel-saver/manual.pdf#page=7", "page": 7 },
+      "confidence": "high"
+    },
+    {
+      "id": "channel-saver:control-range:2",
+      "subject": "channel-saver/ch2-atten",
+      "predicate": "control_range",
+      "value": "-8V to +8V DC offset with Channel 2 Input unpatched",
+      "description": "Channel 2 reaches a wider offset than Channel 1 purely because its normal is +8V rather than +5V.",
+      "source": { "type": "pdf_page", "ref": "modules/channel-saver/manual.pdf#page=7", "page": 7 },
+      "confidence": "high"
+    },
+    {
+      "id": "channel-saver:control-range:3",
+      "subject": "channel-saver/ch3-xfade",
+      "predicate": "control_range",
+      "value": "acts as a plain non-inverting attenuator on the B input while the A input is unpatched",
+      "description": "The 0V normal on the A input turns the crossfader into an attenuator, per the manual's panel notes.",
+      "source": { "type": "pdf_page", "ref": "modules/channel-saver/manual.pdf#page=6", "page": 6 },
+      "confidence": "high"
+    },
+    {
+      "id": "channel-saver:default-level:1",
+      "subject": "channel-saver/sum-out",
+      "predicate": "default_level",
+      "value": "arithmetic maximum +13V with nothing patched and both attenuverters full CW (+5V plus +8V)",
+      "description": "Arithmetic over the two normals. The manual states no SUM headroom, so the real ceiling is unverified.",
+      "source": { "type": "derived", "ref": "arithmetic over modules/channel-saver/manual.pdf#page=6 and #page=7; headroom not stated in the manual" },
+      "confidence": "low"
+    }
+  ]
+}

@@ -1,0 +1,89 @@
+{
+  "schema_version": "1.0.0",
+  "module": {
+    "slug": "navigator",
+    "name": "Navigator",
+    "manufacturer": "Acid Rain Technology",
+    "format": "3U",
+    "hp": 4,
+    "depth_mm": 25,
+    "firmware_version": null,
+    "power": { "plus_12v_ma": 11, "minus_12v_ma": 8 },
+    "manual": { "path": "modules/navigator/manual.pdf", "pages": 1 },
+    "jacks": [
+      { "id": "attenuverter-in", "name": "Attenuverter input (1)", "direction": "in", "kind": "cv" },
+      { "id": "attenuverter-out", "name": "Attenuverter output (2)", "direction": "out", "kind": "cv" },
+      { "id": "attenuator-in", "name": "Attenuator input (3)", "direction": "in", "kind": "cv" },
+      { "id": "attenuator-out", "name": "Attenuator output (4)", "direction": "out", "kind": "cv" }
+    ],
+    "controls": [
+      { "id": "attenuverter-knob", "name": "Attenuverter knob (5)", "type": "knob" },
+      { "id": "attenuator-fader", "name": "Attenuator fader (6)", "type": "fader" }
+    ]
+  },
+  "facts": [
+    {
+      "id": "navigator:normalled-to:1",
+      "subject": "navigator/attenuverter-in",
+      "predicate": "normalled_to",
+      "value": "+5V",
+      "description": "The attenuverter input carries an internal 5V when no cable is inserted, so the knob becomes a bipolar offset.",
+      "source": { "type": "pdf_page", "ref": "modules/navigator/manual.pdf#page=1", "page": 1 },
+      "confidence": "high"
+    },
+    {
+      "id": "navigator:normalled-to:2",
+      "subject": "navigator/attenuator-in",
+      "predicate": "normalled_to",
+      "value": "+5V",
+      "description": "The attenuator input carries the same internal 5V when no cable is inserted, feeding the fader.",
+      "source": { "type": "pdf_page", "ref": "modules/navigator/manual.pdf#page=1", "page": 1 },
+      "confidence": "high"
+    },
+    {
+      "id": "navigator:summed-into:1",
+      "subject": "navigator/attenuator-out",
+      "predicate": "summed_into",
+      "value": "navigator/attenuverter-out",
+      "description": "Left unpatched, the attenuator output is mixed at unity gain into the attenuverter output.",
+      "source": { "type": "pdf_page", "ref": "modules/navigator/manual.pdf#page=1", "page": 1 },
+      "confidence": "high"
+    },
+    {
+      "id": "navigator:normalization-breaks-at:1",
+      "subject": "navigator/attenuator-out",
+      "predicate": "normalization_breaks_at",
+      "value": "cable inserted in the attenuator output (4)",
+      "description": "Patching output (4) takes it out of the internal unity-gain mix, splitting the module into two utilities.",
+      "source": { "type": "pdf_page", "ref": "modules/navigator/manual.pdf#page=1", "page": 1 },
+      "confidence": "high"
+    },
+    {
+      "id": "navigator:default-level:1",
+      "subject": "navigator/attenuverter-out",
+      "predicate": "default_level",
+      "value": "-5V to +5V (bipolar) with no input patched",
+      "description": "With both outputs used separately and nothing patched in, output (2) is a bipolar manual voltage source.",
+      "source": { "type": "pdf_page", "ref": "modules/navigator/manual.pdf#page=1", "page": 1 },
+      "confidence": "high"
+    },
+    {
+      "id": "navigator:default-level:2",
+      "subject": "navigator/attenuator-out",
+      "predicate": "default_level",
+      "value": "0V to +5V (unipolar) with no input patched",
+      "description": "Used separately, output (4) is a unipolar manual voltage source driven by the fader over the 5V normal.",
+      "source": { "type": "pdf_page", "ref": "modules/navigator/manual.pdf#page=1", "page": 1 },
+      "confidence": "high"
+    },
+    {
+      "id": "navigator:default-level:3",
+      "subject": "navigator/attenuverter-out",
+      "predicate": "default_level",
+      "value": "-5V to +10V with nothing patched anywhere, as the two normalled paths sum at unity",
+      "description": "Inferred by combining the two stated 5V normals with the stated unity-gain mix; the manual gives no combined range.",
+      "source": { "type": "pdf_page", "ref": "modules/navigator/manual.pdf#page=1", "page": 1 },
+      "confidence": "medium"
+    }
+  ]
+}
