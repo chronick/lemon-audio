@@ -1,0 +1,108 @@
+{
+  "schema_version": "1.0.0",
+  "module": {
+    "slug": "duatt-1u",
+    "name": "Duatt 1U",
+    "manufacturer": "Intellijel",
+    "format": "1U",
+    "hp": 14,
+    "depth_mm": 22,
+    "firmware_version": null,
+    "power": { "plus_12v_ma": 12, "minus_12v_ma": 10 },
+    "manual": { "path": "modules/duatt-1u/manual.pdf", "pages": 10 },
+    "jacks": [
+      { "id": "in-a", "name": "IN A", "direction": "in", "kind": "cv" },
+      { "id": "in-b", "name": "IN B", "direction": "in", "kind": "cv" },
+      { "id": "out-a", "name": "OUT A", "direction": "out", "kind": "cv" },
+      { "id": "out-b", "name": "OUT B", "direction": "out", "kind": "cv" }
+    ],
+    "controls": [
+      { "id": "atten-a", "name": "Channel A attenuator", "type": "knob" },
+      { "id": "atten-b", "name": "Channel B attenuator", "type": "knob" },
+      { "id": "pol-a", "name": "Channel A polarity switch (UNI / -+)", "type": "switch" },
+      { "id": "pol-b", "name": "Channel B polarity switch (UNI / -+)", "type": "switch" },
+      { "id": "ax2", "name": "Ax2 switch", "type": "switch" }
+    ]
+  },
+  "facts": [
+    {
+      "id": "duatt-1u:normalled-to:1",
+      "subject": "duatt-1u/in-a",
+      "predicate": "normalled_to",
+      "value": "+5V DC",
+      "description": "With no cable in IN A the module feeds Channel A an internal 5V DC source.",
+      "source": { "type": "pdf_page", "ref": "modules/duatt-1u/manual.pdf#page=8", "page": 8 },
+      "confidence": "high"
+    },
+    {
+      "id": "duatt-1u:normalled-to:2",
+      "subject": "duatt-1u/in-b",
+      "predicate": "normalled_to",
+      "value": "+5V DC",
+      "description": "With no cable in IN B the module feeds Channel B an internal 5V DC source.",
+      "source": { "type": "pdf_page", "ref": "modules/duatt-1u/manual.pdf#page=8", "page": 8 },
+      "confidence": "high"
+    },
+    {
+      "id": "duatt-1u:summed-into:1",
+      "subject": "duatt-1u/out-a",
+      "predicate": "summed_into",
+      "value": "duatt-1u/out-b",
+      "description": "Unpatched, Channel A's output voltage is bussed to Channel B and summed with it, so OUT B carries A+B.",
+      "source": { "type": "pdf_page", "ref": "modules/duatt-1u/manual.pdf#page=8", "page": 8 },
+      "confidence": "high"
+    },
+    {
+      "id": "duatt-1u:normalization-breaks-at:1",
+      "subject": "duatt-1u/out-a",
+      "predicate": "normalization_breaks_at",
+      "value": "cable inserted in OUT A",
+      "description": "Patching OUT A removes Channel A from the sum at OUT B; the two channels then run independently.",
+      "source": { "type": "pdf_page", "ref": "modules/duatt-1u/manual.pdf#page=8", "page": 8 },
+      "confidence": "high"
+    },
+    {
+      "id": "duatt-1u:default-level:1",
+      "subject": "duatt-1u/in-a",
+      "predicate": "default_level",
+      "value": {
+        "ax2_off": "+5V",
+        "ax2_on": "+10V",
+        "ax2_on_bipolar_full_ccw": "-10V"
+      },
+      "description": "The Ax2 switch doubles whatever is at IN A, including the internal normal, giving a switchable DC offset source.",
+      "source": { "type": "pdf_page", "ref": "modules/duatt-1u/manual.pdf#page=7", "page": 7 },
+      "confidence": "high"
+    },
+    {
+      "id": "duatt-1u:control-range:1",
+      "subject": "duatt-1u/atten-a",
+      "predicate": "control_range",
+      "value": {
+        "uni": "0V at full CCW to the full input value at full CW",
+        "bipolar": "inverted input at full CCW, 0V at noon, full input at full CW"
+      },
+      "description": "The polarity switch decides whether the knob attenuates or attenuverts, over a patched signal or over the normal.",
+      "source": { "type": "pdf_page", "ref": "modules/duatt-1u/manual.pdf#page=7", "page": 7 },
+      "confidence": "high"
+    },
+    {
+      "id": "duatt-1u:default-level:2",
+      "subject": "duatt-1u/out-a",
+      "predicate": "default_level",
+      "value": "+2.5V with IN A unpatched, polarity UNI and the attenuator at noon",
+      "description": "Inferred by applying the stated half-voltage-at-noon behaviour of the UNI attenuator to the stated +5V normal.",
+      "source": { "type": "pdf_page", "ref": "modules/duatt-1u/manual.pdf#page=7", "page": 7 },
+      "confidence": "medium"
+    },
+    {
+      "id": "duatt-1u:default-level:3",
+      "subject": "duatt-1u/out-b",
+      "predicate": "default_level",
+      "value": "arithmetic maximum +15V with nothing patched, Ax2 on and both knobs full CW (Ch A +10V summed with Ch B +5V)",
+      "description": "Arithmetic over the two normals. The manual states no output headroom, so the real ceiling is unverified.",
+      "source": { "type": "derived", "ref": "arithmetic over modules/duatt-1u/manual.pdf#page=7 and #page=8; headroom not stated in the manual" },
+      "confidence": "low"
+    }
+  ]
+}

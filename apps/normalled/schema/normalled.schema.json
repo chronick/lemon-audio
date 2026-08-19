@@ -1,0 +1,142 @@
+{
+  "$schema": "https://json-schema.org/draft/2020-12/schema",
+  "$id": "https://lemon.audio/schemas/normalled/normalled.schema.json",
+  "title": "Normalled module record",
+  "description": "One Eurorack module, its declared jacks/controls, and a set of addressable, provenance-carrying facts about its normalization and calibration behavior.",
+  "version": "1.0.0",
+  "type": "object",
+  "required": ["schema_version", "module", "facts"],
+  "additionalProperties": false,
+  "properties": {
+    "schema_version": { "const": "1.0.0" },
+    "module": { "$ref": "#/$defs/module" },
+    "facts": {
+      "type": "array",
+      "items": { "$ref": "#/$defs/fact" }
+    }
+  },
+  "$defs": {
+    "slug": {
+      "type": "string",
+      "pattern": "^[a-z0-9][a-z0-9_-]*$"
+    },
+    "path": {
+      "description": "A module slug, optionally followed by /-separated jack or control ids.",
+      "type": "string",
+      "pattern": "^[a-z0-9][a-z0-9_-]*(/[a-z0-9][a-z0-9_.-]*)*$"
+    },
+    "module": {
+      "type": "object",
+      "required": ["slug", "name", "manufacturer", "manual"],
+      "additionalProperties": false,
+      "properties": {
+        "slug": { "$ref": "#/$defs/slug" },
+        "name": { "type": "string", "maxLength": 200 },
+        "manufacturer": { "type": "string", "maxLength": 200 },
+        "format": { "type": "string", "enum": ["3U", "1U"] },
+        "hp": { "type": "number", "minimum": 1 },
+        "depth_mm": { "type": "number", "minimum": 1 },
+        "firmware_version": { "type": ["string", "null"], "maxLength": 200 },
+        "power": {
+          "type": "object",
+          "additionalProperties": false,
+          "properties": {
+            "plus_12v_ma": { "type": "number", "minimum": 0 },
+            "minus_12v_ma": { "type": "number", "minimum": 0 },
+            "plus_5v_ma": { "type": "number", "minimum": 0 }
+          }
+        },
+        "manual": {
+          "description": "The manufacturer PDF every pdf_page source in this record cites.",
+          "type": "object",
+          "required": ["path", "pages"],
+          "additionalProperties": false,
+          "properties": {
+            "path": { "type": "string", "pattern": "^modules/[a-z0-9][a-z0-9_-]*/manual\\.pdf$" },
+            "pages": { "type": "integer", "minimum": 1 }
+          }
+        },
+        "jacks": {
+          "type": "array",
+          "items": {
+            "type": "object",
+            "required": ["id", "name", "direction"],
+            "additionalProperties": false,
+            "properties": {
+              "id": { "type": "string", "pattern": "^[a-z0-9][a-z0-9_.-]*$" },
+              "name": { "type": "string", "maxLength": 200 },
+              "direction": { "type": "string", "enum": ["in", "out"] },
+              "kind": { "type": "string", "enum": ["cv", "audio", "gate", "clock", "mixed"] }
+            }
+          }
+        },
+        "controls": {
+          "type": "array",
+          "items": {
+            "type": "object",
+            "required": ["id", "name", "type"],
+            "additionalProperties": false,
+            "properties": {
+              "id": { "type": "string", "pattern": "^[a-z0-9][a-z0-9_.-]*$" },
+              "name": { "type": "string", "maxLength": 200 },
+              "type": { "type": "string", "enum": ["knob", "fader", "switch", "button", "combo-pot"] }
+            }
+          }
+        }
+      }
+    },
+    "fact": {
+      "description": "One addressable claim. Normalization and calibration facts must cite a pdf_page.",
+      "type": "object",
+      "required": ["id", "subject", "predicate", "value", "source", "confidence"],
+      "additionalProperties": false,
+      "properties": {
+        "id": {
+          "type": "string",
+          "pattern": "^[a-z0-9][a-z0-9_-]*:[a-z0-9][a-z0-9-]*:[0-9]+$"
+        },
+        "subject": { "$ref": "#/$defs/path" },
+        "predicate": {
+          "type": "string",
+          "enum": [
+            "normalled_to",
+            "normalization_breaks_at",
+            "summed_into",
+            "default_level",
+            "control_range"
+          ]
+        },
+        "value": { "type": ["string", "object"] },
+        "description": { "type": "string", "maxLength": 200 },
+        "source": { "$ref": "#/$defs/source" },
+        "confidence": { "type": "string", "enum": ["high", "medium", "low"] }
+      }
+    },
+    "source": {
+      "description": "Typed provenance. A patch-library manual.md is never a valid source.",
+      "type": "object",
+      "required": ["type", "ref"],
+      "additionalProperties": false,
+      "properties": {
+        "type": { "type": "string", "enum": ["pdf_page", "html_anchor", "vendor_url", "derived"] },
+        "ref": { "type": "string", "maxLength": 300 },
+        "page": { "type": "integer", "minimum": 1 }
+      }
+    },
+    "collection": {
+      "description": "The compact projection emitted by scripts/generate.mjs.",
+      "type": "object",
+      "required": ["schema_version", "generator", "modules"],
+      "additionalProperties": false,
+      "properties": {
+        "schema_version": { "const": "1.0.0" },
+        "generator": { "type": "string", "maxLength": 200 },
+        "excludes": { "type": "string", "maxLength": 300 },
+        "modules": {
+          "type": "array",
+          "items": { "$ref": "#" }
+        }
+      }
+    }
+  }
+}
